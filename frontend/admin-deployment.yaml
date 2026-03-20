@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-frontend
+  namespace: tracking-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin-frontend
+  template:
+    metadata:
+      labels:
+        app: admin-frontend
+    spec:
+      containers:
+      - name: admin
+        image: 088310115913.dkr.ecr.us-east-1.amazonaws.com/admin-frontend:latest
+        ports:
+        - containerPort: 80
