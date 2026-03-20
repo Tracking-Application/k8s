@@ -1,0 +1,75 @@
+name: Deploy Full Stack to EKS
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. AWS Login
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # 3. Install kubectl
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      # 4. Connect to EKS
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region $AWS_REGION \
+            --name $EKS_CLUSTER_NAME
+
+      # -------------------------
+      # 5. Deploy Postgres
+      # -------------------------
+      - name: Deploy Postgres
+        run: |
+          kubectl apply -f postgress/
+          kubectl rollout status deployment/postgres || true
+
+      # Wait for DB to be ready
+      - name: Wait for Postgres
+        run: |
+          kubectl wait --for=condition=available deployment/postgres --timeout=120s || true
+
+      # -------------------------
+      # 6. Deploy Backend
+      # -------------------------
+      - name: Deploy Backend
+        run: |
+          kubectl apply -f k8s-backend/
+          kubectl rollout status deployment/backend || true
+
+      # -------------------------
+      # 7. Deploy Frontend
+      # -------------------------
+      - name: Deploy Frontend
+        run: |
+          kubectl apply -f k8s-frontend/
+          kubectl rollout status deployment/frontend || true
+
+      # -------------------------
+      # 8. Verify Everything
+      # -------------------------
+      - name: Verify all resources
+        run: |
+          kubectl get pods
+          kubectl get svc
