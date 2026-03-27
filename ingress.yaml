@@ -4,51 +4,34 @@ metadata:
   name: tracking-app-ingress
   namespace: tracking-app
   annotations:
-    kubernetes.io/ingress.class: nginx
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /
 spec:
+  ingressClassName: alb
   rules:
-    - host: tracking.example.com
+
+    # ✅ CUSTOMER FRONTEND
+    - host: softwarestack.xyz
       http:
         paths:
-          - path: /admin
-            pathType: Prefix
-            backend:
-              service:
-                name: admin-frontend
-                port:
-                  number: 80
-          - path: /customer
+          - path: /
             pathType: Prefix
             backend:
               service:
                 name: customer-frontend
                 port:
                   number: 80
-          - path: /auth
+
+    # ✅ ADMIN FRONTEND
+    - host: admin.softwarestack.xyz
+      http:
+        paths:
+          - path: /
             pathType: Prefix
             backend:
               service:
-                name: auth-service
+                name: admin-frontend
                 port:
-                  number: 8001
-          - path: /product
-            pathType: Prefix
-            backend:
-              service:
-                name: product-service
-                port:
-                  number: 8003
-          - path: /tracking
-            pathType: Prefix
-            backend:
-              service:
-                name: tracking-service
-                port:
-                  number: 8004
-          - path: /order
-            pathType: Prefix
-            backend:
-              service:
-                name: order-service
-                port:
-                  number: 8002
+                  number: 80
