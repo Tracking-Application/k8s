@@ -9,6 +9,6 @@ spec:
     app: product-service
   ports:
     - name: http
-      port: 8003
-      targetPort: 8003
+      port: 8002
+      targetPort: 8002
       protocol: TCP

@@ -18,7 +18,7 @@ spec:
           image: 088310115913.dkr.ecr.us-east-1.amazonaws.com/products-service:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 8003
+            - containerPort: 8002
               protocol: TCP
           env:
             - name: POSTGRES_DB

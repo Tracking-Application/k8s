@@ -9,6 +9,6 @@ spec:
     app: order-service
   ports:
     - name: http
-      port: 8002
-      targetPort: 8002
+      port: 8003
+      targetPort: 8003
       protocol: TCP
